@@ -1,20 +1,12 @@
 const admin = require("firebase-admin");
-const path = require("path");
 
-const serviceAccount = require(path.join(
-  __dirname,
-  "firebaseAdmin.json"
-));
+// 🔥 LOAD FROM ENV, NOT FILE
+const serviceAccount = JSON.parse(process.env.FIREBASE_ADMIN);
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
 
 const db = admin.firestore();
-const auth = admin.auth();
 
-module.exports = {
-  admin,
-  db,
-  auth,
-};
+module.exports = { admin, db };
