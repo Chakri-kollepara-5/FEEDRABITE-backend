@@ -1,12 +1,13 @@
 const admin = require("firebase-admin");
 
-// 🔥 LOAD FROM ENV, NOT FILE
-const serviceAccount = JSON.parse(process.env.FIREBASE_ADMIN);
+if (!process.env.FIREBASE_ADMIN) {
+  throw new Error("❌ FIREBASE_ADMIN env missing");
+}
 
 admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
+  credential: admin.credential.cert(
+    JSON.parse(process.env.FIREBASE_ADMIN)
+  ),
 });
 
-const db = admin.firestore();
-
-module.exports = { admin, db };
+module.exports = admin;
