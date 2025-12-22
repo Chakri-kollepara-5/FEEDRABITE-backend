@@ -13,10 +13,9 @@ const createDonation = async (req, res) => {
   }
 };
 
-const getDonations = async (req, res) => {
+const listDonations = async (req, res) => {
   try {
-    const { status } = req.query;
-    const donations = await listDonationsService(status);
+    const donations = await listDonationsService();
     res.json(donations);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -25,8 +24,8 @@ const getDonations = async (req, res) => {
 
 const claimDonation = async (req, res) => {
   try {
-    const result = await claimDonationService(req.params.id, req.user);
-    res.json(result);
+    const donation = await claimDonationService(req.params.id, req.user);
+    res.json(donation);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
@@ -34,6 +33,6 @@ const claimDonation = async (req, res) => {
 
 module.exports = {
   createDonation,
-  getDonations,
+  listDonations,
   claimDonation,
 };

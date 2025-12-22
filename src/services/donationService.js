@@ -1,75 +1,46 @@
 const { db } = require("../config/firebase");
 
-/**
- * CREATE donation
- */
-const createDonationService = async (data, user) => {
-  const ref = db.collection("donations").doc();
+exports.listDonations = async () => {
+  const snap = await db
+    .collection("donations")
+    .orderBy("createdAt", "desc")
+    .get();
 
-  const payload = {
-    id: ref.id,
-    foodType: data.foodType,
-    description: data.description || "",
-    quantity: data.quantity,
-    location: data.location,
-    status: "available",
-    donorId: user.uid,
-    donorName: user.name || "",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  };
-
-  await ref.set(payload);
-  return payload;
-};
-
-/**
- * LIST donations (public)
- */
-const listDonationsService = async (status) => {
-  let query = db.collection("donations");
-
-  if (status) {
-    query = query.where("status", "==", status);
-  }
-
-  const snap = await query.orderBy("createdAt", "desc").get();
-
-  return snap.docs.map(doc => ({
-    id: doc.id,
-    ...doc.data(),
+  return snap.docs.map(d => ({
+    id: d.id,
+    ...d.data()
   }));
 };
 
-/**
- * CLAIM donation
- */
-const claimDonationService = async (id, user) => {
+exports.createDonation = async (data, user) => {
+  const ref = db.collection("donations").doc();
+
+  const payload = {
+    ...data,
+    status: "available",
+    donorId: user.uid,
+    createdAt: new Date(),
+  };
+
+  await ref.set(payload);
+  return { id: ref.id, ...payload };
+};
+
+exports.claimDonation = async (id, user) => {
   const ref = db.collection("donations").doc(id);
-  const snap = await ref.get();
+  const doc = await ref.get();
 
-  if (!snap.exists) {
-    throw new Error("Donation not found");
-  }
+  if (!doc.exists) throw new Error("Not found");
 
-  const data = snap.data();
-
-  if (data.status !== "available") {
-    throw new Error("Donation already claimed");
+  if (doc.data().status !== "available") {
+    throw new Error("Already claimed");
   }
 
   await ref.update({
     status: "claimed",
     claimedBy: user.uid,
     claimedAt: new Date(),
-    updatedAt: new Date(),
   });
 
   return { id, status: "claimed" };
-};
-
-module.exports = {
-  createDonationService,
-  listDonationsService,
-  claimDonationService,
 };
