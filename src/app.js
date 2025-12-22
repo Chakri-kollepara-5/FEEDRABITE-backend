@@ -5,6 +5,7 @@ const feedRoutes = require("./routes/feedRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 const hostelBiteRoutes = require("./routes/hostelBiteRoutes");
 const adminRoutes = require("./routes/adminRoutes");
+const donationRoutes = require("./routes/donationRoutes");
 
 const app = express();
 
@@ -22,6 +23,10 @@ app.use("/api/admin", adminRoutes);
 app.get("/__proof__", (req, res) => {
   res.send("THIS IS THE CORRECT BACKEND");
 });
+
+
+app.use("/api", donationRoutes);
+
 
 
 module.exports = app;
