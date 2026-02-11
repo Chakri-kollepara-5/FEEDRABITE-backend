@@ -88,6 +88,14 @@ const loginUser = async (req, res, next) => {
 
         // 4. Create New User if still not found
         if (!user) {
+            const { createIfMissing } = req.body;
+
+            if (!createIfMissing) {
+                console.warn(`⚠️ Login attempted for non-existent user: ${email}`);
+                res.status(404); // Not Found
+                throw new Error('User not found. Please register first.');
+            }
+
             console.log('🆕 Creating new user...');
             try {
                 user = await User.create({
