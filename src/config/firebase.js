@@ -6,7 +6,17 @@ const admin = require('firebase-admin');
 
 if (!admin.apps.length) {
   try {
-    const serviceAccount = require('./firebaseAdmin.json');
+    let serviceAccount;
+
+    // Default: Try Base64 Env Var (Best for Render)
+    if (process.env.FIREBASE_SERVICE_ACCOUNT_BASE64) {
+      const buffer = Buffer.from(process.env.FIREBASE_SERVICE_ACCOUNT_BASE64, 'base64');
+      serviceAccount = JSON.parse(buffer.toString('utf-8'));
+    } else {
+      // Fallback: Try local file
+      serviceAccount = require('./firebaseAdmin.json');
+    }
+
     admin.initializeApp({
       credential: admin.credential.cert(serviceAccount),
       // storageBucket: process.env.FIREBASE_STORAGE_BUCKET 
