@@ -1,23 +1,43 @@
-const { admin } = require("../config/firebase");
+const jwt = require('jsonwebtoken');
+const User = require('../models/User');
 
-const authMiddleware = async (req, res, next) => {
-  try {
-    const authHeader = req.headers.authorization;
+const protect = async (req, res, next) => {
+  let token;
 
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res.status(401).json({ message: "No token provided" });
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith('Bearer')
+  ) {
+    try {
+      token = req.headers.authorization.split(' ')[1];
+
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+      req.user = await User.findById(decoded.id).select('-password');
+
+      if (!req.user) {
+        res.status(401);
+        throw new Error('Not authorized, user not found');
+      }
+
+      next();
+    } catch (error) {
+      console.error(error);
+      res.status(401);
+      // Create a custom error or just send response
+      // For now, next(error) works if we have error handler, or res.status...
+      const err = new Error('Not authorized, token failed');
+      err.statusCode = 401; // basic
+      next(err);
     }
+  }
 
-    const token = authHeader.split(" ")[1];
-
-    const decodedToken = await admin.auth().verifyIdToken(token);
-
-    req.user = decodedToken;
-    next();
-  } catch (error) {
-    console.error("AUTH ERROR:", error);
-    return res.status(401).json({ message: "Invalid or expired token" });
+  if (!token) {
+    res.status(401);
+    const err = new Error('Not authorized, no token');
+    err.statusCode = 401;
+    next(err);
   }
 };
 
-module.exports = authMiddleware;
+module.exports = { protect };
