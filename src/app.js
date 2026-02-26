@@ -26,6 +26,8 @@ app.use('/api/impact', require('./routes/impactRoutes'));
 app.use('/api/upload', require('./routes/uploadRoutes'));
 app.use('/api/chat', require('./routes/chatRoutes'));
 app.use('/api/community', require('./routes/communityRoutes'));
+app.use('/api/stats', require('./routes/statsRoutes'));
+
 
 app.get('/', (req, res) => {
     res.send('Feedra API is running...');
