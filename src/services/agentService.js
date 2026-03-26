@@ -1,8 +1,16 @@
 const Groq = require('groq-sdk');
 
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+let groq = null;
 
 async function callAgent(systemPrompt, userMessage) {
+    if (!process.env.GROQ_API_KEY) {
+        throw new Error("GROQ_API_KEY is missing in environment variables. Please add it to Render settings.");
+    }
+    
+    if (!groq) {
+        groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+    }
+
     const response = await groq.chat.completions.create({
         model: 'llama-3.3-70b-versatile', // free and powerful
         messages: [
