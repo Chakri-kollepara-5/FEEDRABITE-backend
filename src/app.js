@@ -34,7 +34,7 @@ console.log('Routes mounted.');
 
 
 app.get('/', (req, res) => {
-    res.send('Feedra API is running...');
+    res.send('Feedra API v1.1 is running...');
 });
 
 // Error Handling Middleware
