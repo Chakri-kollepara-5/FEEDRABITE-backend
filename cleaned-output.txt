@@ -1,0 +1,55 @@
+  "surplusAnalysis": {
+    "items": [
+      {
+        "name": "Paneer Curry",
+        "kg": 20,
+        "urgency": "medium",
+        "reason": "perishable item with moderate shelf life"
+      },
+      {
+        "name": "Cooked Rice",
+        "kg": 35,
+        "urgency": "high",
+        "reason": "highly perishable item with limited shelf life"
+      }
+    ]
+  },
+  "matches": {
+    "matches": [
+      {
+        "donor": "Local Restaurant",
+        "recipient": "Food Bank India",
+        "food": "Paneer Curry",
+        "kg": 20,
+        "city": "Mumbai",
+        "score": 90,
+        "reason": "perishable item matched with NGO having refrigeration facilities"
+      },
+      {
+        "donor": "Local Restaurant",
+        "recipient": "Akshaya Patra",
+        "food": "Cooked Rice",
+        "kg": 35,
+        "city": "Mumbai",
+        "score": 98,
+        "reason": "highly perishable item matched with NGO having immediate distribution capabilities"
+      }
+    ]
+  },
+  "alerts": {
+    "summary": "Surplus food items matched with potential recipients",
+    "alerts": [
+      {
+        "type": "critical",
+        "title": "Urgent: Cooked Rice Distribution in Mumbai",
+        "body": "35 kg of Cooked Rice needs to be distributed immediately to Akshaya Patra in Mumbai, as it is a highly perishable item with limited shelf life"
+      },
+      {
+        "type": "warning",
+        "title": "Moderate: Paneer Curry Distribution in Mumbai",
+        "body": "20 kg of Paneer Curry needs to be distributed to Food Bank India in Mumbai, as it is a perishable item with moderate shelf life"
+      }
+    ]
+  }
+}
+G£à Pipeline Test Successful!

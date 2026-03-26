@@ -27,6 +27,7 @@ app.use('/api/upload', require('./routes/uploadRoutes'));
 app.use('/api/chat', require('./routes/chatRoutes'));
 app.use('/api/community', require('./routes/communityRoutes'));
 app.use('/api/stats', require('./routes/statsRoutes'));
+app.use('/api/agent', require('./routes/agentRoutes'));
 
 
 app.get('/', (req, res) => {

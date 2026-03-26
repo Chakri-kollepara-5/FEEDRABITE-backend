@@ -10,8 +10,9 @@ const loginUser = async (req, res, next) => {
     // console.log('Headers:', JSON.stringify(req.headers)); // Optional: uncomment if needed
     // console.log('Body:', JSON.stringify(req.body));       // Optional: uncomment if needed
 
+    const startTime = Date.now();
     try {
-        const { firebaseToken } = req.body;
+        const { firebaseToken, userType, organization, phone } = req.body;
 
         if (!firebaseToken) {
             console.error('❌ Missing firebaseToken');
@@ -24,10 +25,10 @@ const loginUser = async (req, res, next) => {
         try {
             const decodedToken = await admin.auth().verifyIdToken(firebaseToken);
             uid = decodedToken.uid;
-            email = decodedToken.email ? decodedToken.email.toLowerCase() : null;
-            name = decodedToken.name;
+            email = decodedToken.email ? decodedToken.email.toLowerCase() : (decodedToken.phone_number ? `${decodedToken.phone_number}@phone.com` : null);
+            name = decodedToken.name || req.body.name;
             picture = decodedToken.picture;
-            console.log(`✅ Firebase Verified. UID: ${uid}, Email: ${email}`);
+            console.log(`✅ Firebase Verified (${Date.now() - startTime}ms). UID: ${uid}, Email: ${email}`);
         } catch (authError) {
             console.error('❌ Firebase Verification Failed:', authError.message);
             // DEV BYPASS Logic
@@ -60,6 +61,23 @@ const loginUser = async (req, res, next) => {
 
         if (user) {
             console.log(`✅ User found by UID: ${user._id}`);
+            // If extra metadata is provided, update the user to ensure sync
+            if (userType || organization || phone || name) {
+                console.log('🔄 Updating existing user metadata...');
+                user = await User.findByIdAndUpdate(
+                    user._id,
+                    {
+                        $set: {
+                            role: userType || user.role,
+                            organization: organization !== undefined ? organization : user.organization,
+                            phone: phone || user.phone,
+                            name: name || user.name,
+                            profileImage: picture || user.profileImage
+                        }
+                    },
+                    { new: true }
+                );
+            }
         }
 
         // 3. Handle Orphaned Account (Email exists, UID doesn't match)
@@ -74,7 +92,10 @@ const loginUser = async (req, res, next) => {
                     $set: {
                         firebaseUid: uid,
                         name: name || undefined,
-                        profileImage: picture || undefined
+                        profileImage: picture || undefined,
+                        role: userType || undefined,
+                        organization: organization || undefined,
+                        phone: phone || undefined
                     },
                     $unset: { location: 1 } // Sanitize corrupted location field
                 },
@@ -102,11 +123,13 @@ const loginUser = async (req, res, next) => {
                     firebaseUid: uid,
                     email: email,
                     name: name || 'New User',
-                    role: 'donor',
+                    role: userType || 'donor',
+                    organization: organization || undefined,
+                    phone: phone || undefined,
                     profileImage: picture || 'no-photo.jpg'
                 });
                 isNewUser = true;
-                console.log(`✅ New User Created: ${user._id}`);
+                console.log(`✅ New User Created (${Date.now() - startTime}ms): ${user._id}`);
             } catch (createError) {
                 // If create failed, it might be a race condition on unique email
                 if (createError.code === 11000) {
@@ -130,7 +153,8 @@ const loginUser = async (req, res, next) => {
             email: user.email,
             role: user.role,
             token: generateToken(user._id),
-            isNewUser
+            isNewUser,
+            latency: Date.now() - startTime
         });
 
     } catch (error) {

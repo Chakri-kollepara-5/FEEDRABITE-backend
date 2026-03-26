@@ -1,0 +1,55 @@
+﻿{
+  "surplusAnalysis": {
+    "items": [
+      {
+        "name": "Paneer Curry",
+        "kg": 20,
+        "urgency": "medium",
+        "reason": "Perishable item, needs to be consumed within a day"
+      },
+      {
+        "name": "Cooked Rice",
+        "kg": 35,
+        "urgency": "high",
+        "reason": "High risk of spoilage, must be distributed immediately"
+      }
+    ]
+  },
+  "matches": {
+    "matches": [
+      {
+        "donor": "Indian Restaurant",
+        "recipient": "Akshaya Patra",
+        "food": "Paneer Curry",
+        "kg": 20,
+        "city": "Mumbai",
+        "score": 90,
+        "reason": "Proximity and urgency match, Akshaya Patra can distribute perishable items quickly"
+      },
+      {
+        "donor": "Community Kitchen",
+        "recipient": "Goonj",
+        "food": "Cooked Rice",
+        "kg": 35,
+        "city": "Delhi",
+        "score": 98,
+        "reason": "Goonj has a strong network for immediate distribution, reducing spoilage risk"
+      }
+    ]
+  },
+  "alerts": {
+    "summary": "Surplus food matching results",
+    "alerts": [
+      {
+        "type": "critical",
+        "title": "Urgent: Distribute Cooked Rice in Delhi",
+        "body": "35 kg of Cooked Rice from Community Kitchen must be distributed immediately to Goonj in Delhi to avoid spoilage, with a match score of 98"
+      },
+      {
+        "type": "medium",
+        "title": "Paneer Curry Distribution in Mumbai",
+        "body": "20 kg of Paneer Curry from Indian Restaurant should be distributed to Akshaya Patra in Mumbai within a day, with a match score of 90"
+      }
+    ]
+  }
+}
