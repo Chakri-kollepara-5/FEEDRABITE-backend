@@ -19,6 +19,7 @@ app.use(morgan('dev'));
 const { errorHandler } = require('./middlewares/errorMiddleware');
 
 // Routes
+console.log('Mounting routes...');
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/donations', require('./routes/donationRoutes'));
 app.use('/api/admin', require('./routes/adminRoutes'));
@@ -27,7 +28,9 @@ app.use('/api/upload', require('./routes/uploadRoutes'));
 app.use('/api/chat', require('./routes/chatRoutes'));
 app.use('/api/community', require('./routes/communityRoutes'));
 app.use('/api/stats', require('./routes/statsRoutes'));
+console.log('Mounting agent routes...');
 app.use('/api/agent', require('./routes/agentRoutes'));
+console.log('Routes mounted.');
 
 
 app.get('/', (req, res) => {
