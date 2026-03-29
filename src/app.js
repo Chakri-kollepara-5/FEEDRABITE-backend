@@ -1,41 +1,35 @@
-const express = require('express');
-const dotenv = require('dotenv');
-const cors = require('cors');
-const helmet = require('helmet');
-const morgan = require('morgan');
-// const connectDB = require('./config/db'); // Will be called in server.js or here
-
-// Load env vars
-dotenv.config();
-
+const express = require("express");
+const cors = require("cors");
 const app = express();
 
-// Middleware
-app.use(express.json());
 app.use(cors());
-app.use(helmet());
-app.use(morgan('dev'));
+app.use(express.json());
 
-const { errorHandler } = require('./middlewares/errorMiddleware');
+// ROUTES
+const adminRoutes = require("./routes/adminRoutes");
+const agentRoutes = require("./routes/agentRoutes");
+const authRoutes = require("./routes/authRoutes");
+const chatRoutes = require("./routes/chatRoutes");
+const communityRoutes = require("./routes/communityRoutes");
+const dashboardRoutes = require("./routes/dashboardRoutes");
+const donationRoutes = require("./routes/donationRoutes");
+const feedRoutes = require("./routes/feedRoutes");
+const hostelBiteRoutes = require("./routes/hostelBiteRoutes");
+const impactRoutes = require("./routes/impactRoutes");
+const statsRoutes = require("./routes/statsRoutes");
+const uploadRoutes = require("./routes/uploadRoutes");
 
-// Routes
-app.use('/api/auth', require('./routes/authRoutes'));
-app.use('/api/donations', require('./routes/donationRoutes'));
-app.use('/api/admin', require('./routes/adminRoutes'));
-app.use('/api/impact', require('./routes/impactRoutes'));
-app.use('/api/upload', require('./routes/uploadRoutes'));
-app.use('/api/chat', require('./routes/chatRoutes'));
-app.use('/api/community', require('./routes/communityRoutes'));
-app.use('/api/stats', require('./routes/statsRoutes'));
-app.use('/api/agent', require('./routes/agentRoutes'));
-
-
-app.get('/', (req, res) => {
-    res.send('Feedra API is running...');
-});
-
-// Error Handling Middleware
-// Error Handling Middleware
-app.use(errorHandler);
+app.use("/api/admin", adminRoutes);
+app.use("/api/agent", agentRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/chat", chatRoutes);
+app.use("/api/community", communityRoutes);
+app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/donations", donationRoutes);
+app.use("/api/feed", feedRoutes);
+app.use("/api/hostelbite", hostelBiteRoutes);
+app.use("/api/impact", impactRoutes);
+app.use("/api/stats", statsRoutes);
+app.use("/api/upload", uploadRoutes);
 
 module.exports = app;
