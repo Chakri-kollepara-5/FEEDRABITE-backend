@@ -2,14 +2,14 @@ const express = require("express");
 const router = express.Router();
 const {
   createHostelBite,
-  getHostelBites,
+  listHostelBite,
   assignHostelBite,
 } = require("../controllers/hostelBiteController");
 
 const authMiddleware = require("../middlewares/authMiddleware");
 
 // ✅ PUBLIC READ
-router.get("/", getHostelBites);
+router.get("/", listHostelBite);
 
 // 🔒 PROTECTED WRITES
 router.post("/", authMiddleware, createHostelBite);

@@ -1,5 +1,4 @@
-const admin = require('../config/firebase');
-const db = admin.firestore();
+const { admin, db } = require('../config/firebase');
 const { sendNotification } = require('../services/notificationService');
 const User = require('../models/User');
 
