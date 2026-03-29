@@ -3,9 +3,12 @@ const mongoose = require('mongoose');
 const connectDB = async () => {
     try {
         mongoose.set('strictQuery', false);
+        mongoose.set('bufferCommands', false);
+        mongoose.set('bufferTimeoutMS', 5000);
+
         const conn = await mongoose.connect(process.env.MONGO_URI, {
             serverSelectionTimeoutMS: 5000,
-            bufferCommands: false
+            autoIndex: true
         });
         console.log(`MongoDB Connected: ${conn.connection.host}`);
     } catch (error) {
