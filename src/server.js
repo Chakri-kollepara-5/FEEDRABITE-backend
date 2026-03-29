@@ -1,8 +1,20 @@
 require("dotenv").config();
 const app = require("./app");
+const connectDB = require("./config/db");
 
-const PORT = process.env.PORT || 5000;
+const startServer = async () => {
+    try {
+        // Connect to Database first
+        await connectDB();
 
-app.listen(PORT, () => {
-  console.log(`🚀 Feedra backend running on port ${PORT}`);
-});
+        const PORT = process.env.PORT || 5001;
+        app.listen(PORT, () => {
+            console.log(`🚀 Feedra backend running on port ${PORT}`);
+        });
+    } catch (error) {
+        console.error('🔥 Server failed to start:', error);
+        process.exit(1);
+    }
+};
+
+startServer();
