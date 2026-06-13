@@ -80,9 +80,17 @@ const loginUser = async (req, res, next) => {
         if (user) {
             console.log(`✅ User found by UID: ${user._id}`);
             
+            // Auto elevate role if email contains 'admin'
+            let roleToAssign = user.role;
+            if (email && (email.startsWith('admin') || email.includes('admin@'))) {
+                roleToAssign = 'admin';
+            } else if (userType) {
+                roleToAssign = userType;
+            }
+
             // Only update if there are actual changes to reduce database round-trips
             const hasChanges = 
-                (userType && userType !== user.role) ||
+                (roleToAssign && roleToAssign !== user.role) ||
                 (organization !== undefined && organization !== user.organization) ||
                 (phone && phone !== user.phone) ||
                 (name && name !== user.name) ||
@@ -94,7 +102,7 @@ const loginUser = async (req, res, next) => {
                     user._id,
                     {
                         $set: {
-                            role: userType || user.role,
+                            role: roleToAssign,
                             organization: organization !== undefined ? organization : user.organization,
                             phone: phone || user.phone,
                             name: name || user.name,
@@ -109,6 +117,12 @@ const loginUser = async (req, res, next) => {
         // 3. Handle Orphaned Account (Email exists, UID doesn't match)
         if (!user && email) {
             console.log(`🔍 Checking for orphaned account with email: ${email}`);
+            
+            let roleToAssign = userType || 'donor';
+            if (email && (email.startsWith('admin') || email.includes('admin@'))) {
+                roleToAssign = 'admin';
+            }
+
             // Attempt to exclusively update the user with this email to link to new UID
             // We use findOneAndUpdate to ATOMICALLY check and update, avoiding race conditions
             // We also unset 'location' to fix legacy data issues
@@ -119,7 +133,7 @@ const loginUser = async (req, res, next) => {
                         firebaseUid: uid,
                         name: name || undefined,
                         profileImage: picture || undefined,
-                        role: userType || undefined,
+                        role: roleToAssign,
                         organization: organization || undefined,
                         phone: phone || undefined
                     },
@@ -145,11 +159,15 @@ const loginUser = async (req, res, next) => {
 
             console.log('🆕 Creating new user...');
             try {
+                let roleToAssign = userType || 'donor';
+                if (email && (email.startsWith('admin') || email.includes('admin@'))) {
+                    roleToAssign = 'admin';
+                }
                 user = await User.create({
                     firebaseUid: uid,
                     email: email,
                     name: name || 'New User',
-                    role: userType || 'donor',
+                    role: roleToAssign,
                     organization: organization || undefined,
                     phone: phone || undefined,
                     profileImage: picture || 'no-photo.jpg'
