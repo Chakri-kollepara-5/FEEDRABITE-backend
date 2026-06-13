@@ -1,26 +1,22 @@
-const { db } = require("../config/firebase");
+const Feed = require("../models/Feed");
+const HostelBite = require("../models/HostelBite");
 
 const fetchDashboardSummary = async () => {
-  const feedsSnap = await db.collection("feeds").get();
-  const hostelSnap = await db
-    .collection("hostelbite")
-    .where("status", "==", "available")
-    .get();
+  const totalFeeds = await Feed.countDocuments();
+  const activeHostelBite = await HostelBite.countDocuments({ status: "available" });
 
   return {
-    totalFeeds: feedsSnap.size,
-    activeHostelBite: hostelSnap.size,
+    totalFeeds,
+    activeHostelBite,
   };
 };
 
 const fetchRecentFeeds = async (limit) => {
-  const snap = await db
-    .collection("feeds")
-    .orderBy("createdAt", "desc")
-    .limit(limit)
-    .get();
+  const feeds = await Feed.find()
+    .sort({ createdAt: -1 })
+    .limit(limit);
 
-  return snap.docs.map((d) => d.data());
+  return feeds;
 };
 
 module.exports = {

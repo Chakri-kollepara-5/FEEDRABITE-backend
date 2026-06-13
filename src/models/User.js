@@ -22,6 +22,9 @@ const userSchema = new mongoose.Schema({
         enum: ['donor', 'ngo', 'volunteer', 'admin'],
         default: 'donor'
     },
+    organization: {
+        type: String
+    },
     name: {
         type: String,
         required: [true, 'Please add a name']

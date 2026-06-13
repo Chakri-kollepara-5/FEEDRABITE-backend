@@ -2,18 +2,14 @@ const express = require("express");
 const router = express.Router();
 
 const {
-  createDonation,
-  listDonations,
-  claimDonation,
-} = require("../controllers/donationController");
+  getDashboardSummary,
+  getRecentFeeds,
+} = require("../controllers/dashboardController");
 
 const authMiddleware = require("../middlewares/authMiddleware");
 
-// ✅ PUBLIC READ
-router.get("/", listDonations);
-
-// 🔒 PROTECTED WRITE
-router.post("/", authMiddleware, createDonation);
-router.patch("/:id/claim", authMiddleware, claimDonation);
+// Dashboard endpoints
+router.get("/", authMiddleware, getDashboardSummary);
+router.get("/feeds", authMiddleware, getRecentFeeds);
 
 module.exports = router;

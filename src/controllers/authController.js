@@ -22,35 +22,53 @@ const loginUser = async (req, res, next) => {
 
         // 1. Verify Firebase Token
         let uid, email, name, picture;
-        try {
-            const decodedToken = await admin.auth().verifyIdToken(firebaseToken);
-            uid = decodedToken.uid;
-            email = decodedToken.email ? decodedToken.email.toLowerCase() : (decodedToken.phone_number ? `${decodedToken.phone_number}@phone.com` : null);
-            name = decodedToken.name || req.body.name;
-            picture = decodedToken.picture;
-            console.log(`✅ Firebase Verified (${Date.now() - startTime}ms). UID: ${uid}, Email: ${email}`);
-        } catch (authError) {
-            console.error('❌ Firebase Verification Failed:', authError.message);
-            // DEV BYPASS Logic
-            if (process.env.NODE_ENV === 'development') {
-                console.warn('⚠️ Entering DEV BYPASS mode...');
-                const jwt = require('jsonwebtoken');
-                const decoded = jwt.decode(firebaseToken);
-                if (decoded) {
-                    uid = decoded.sub || decoded.user_id;
-                    email = decoded.email ? decoded.email.toLowerCase() : 'dev@example.com';
-                    name = decoded.name;
-                    picture = decoded.picture;
-                    console.log(`⚠️ Dev Bypass Success. UID: ${uid}`);
+        let isDevMock = false;
+
+        if (process.env.NODE_ENV === 'development') {
+            const jwt = require('jsonwebtoken');
+            const decoded = jwt.decode(firebaseToken);
+            // If the token is not a valid Firebase JWT (e.g. mock token or alphanumeric string), bypass the verifyIdToken network request immediately to prevent slow timeouts.
+            if (!decoded || !decoded.iss || !decoded.iss.startsWith('https://securetoken.google.com/')) {
+                isDevMock = true;
+                uid = decoded?.sub || decoded?.user_id || 'dev_user_123';
+                email = decoded?.email ? decoded.email.toLowerCase() : 'dev@example.com';
+                name = decoded?.name || req.body.name || 'Dev User';
+                picture = decoded?.picture || 'no-photo.jpg';
+                console.log(`⚠️ Dev Mock Token Bypass active. UID: ${uid}, Email: ${email}`);
+            }
+        }
+
+        if (!isDevMock) {
+            try {
+                const decodedToken = await admin.auth().verifyIdToken(firebaseToken);
+                uid = decodedToken.uid;
+                email = decodedToken.email ? decodedToken.email.toLowerCase() : (decodedToken.phone_number ? `${decodedToken.phone_number}@phone.com` : null);
+                name = decodedToken.name || req.body.name;
+                picture = decodedToken.picture;
+                console.log(`✅ Firebase Verified (${Date.now() - startTime}ms). UID: ${uid}, Email: ${email}`);
+            } catch (authError) {
+                console.error('❌ Firebase Verification Failed:', authError.message);
+                // DEV BYPASS Logic
+                if (process.env.NODE_ENV === 'development') {
+                    console.warn('⚠️ Entering DEV BYPASS mode...');
+                    const jwt = require('jsonwebtoken');
+                    const decoded = jwt.decode(firebaseToken);
+                    if (decoded) {
+                        uid = decoded.sub || decoded.user_id;
+                        email = decoded.email ? decoded.email.toLowerCase() : 'dev@example.com';
+                        name = decoded.name || req.body.name;
+                        picture = decoded.picture;
+                        console.log(`⚠️ Dev Bypass Success. UID: ${uid}`);
+                    } else {
+                        uid = 'dev_user_123';
+                        email = 'dev@example.com';
+                        name = 'Dev User';
+                        console.log('⚠️ Dev Bypass User Used');
+                    }
                 } else {
-                    uid = 'dev_user_123';
-                    email = 'dev@example.com';
-                    name = 'Dev User';
-                    console.log('⚠️ Dev Bypass User Used');
+                    res.status(401); // Unauthorized
+                    throw new Error('Invalid Firebase Token');
                 }
-            } else {
-                res.status(401); // Unauthorized
-                throw new Error('Invalid Firebase Token');
             }
         }
 
@@ -61,9 +79,17 @@ const loginUser = async (req, res, next) => {
 
         if (user) {
             console.log(`✅ User found by UID: ${user._id}`);
-            // If extra metadata is provided, update the user to ensure sync
-            if (userType || organization || phone || name) {
-                console.log('🔄 Updating existing user metadata...');
+            
+            // Only update if there are actual changes to reduce database round-trips
+            const hasChanges = 
+                (userType && userType !== user.role) ||
+                (organization !== undefined && organization !== user.organization) ||
+                (phone && phone !== user.phone) ||
+                (name && name !== user.name) ||
+                (picture && picture !== user.profileImage);
+
+            if (hasChanges) {
+                console.log('🔄 Updating existing user metadata (changes detected)...');
                 user = await User.findByIdAndUpdate(
                     user._id,
                     {

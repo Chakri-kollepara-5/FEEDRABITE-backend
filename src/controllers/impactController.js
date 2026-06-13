@@ -59,13 +59,31 @@ const getGlobalImpact = async (req, res, next) => {
     }
 };
 
-// @desc    Get user impact metrics
-// @route   GET /api/impact/user/:id
-// @access  Private
 const getUserImpact = async (req, res, next) => {
     try {
+        const mongoose = require('mongoose');
+        const User = require('../models/User');
+
+        let userObjectId = req.params.id;
+        
+        // Resolve Firebase UID string to MongoDB ObjectId if needed
+        if (typeof userObjectId === 'string' && !mongoose.Types.ObjectId.isValid(userObjectId)) {
+            const user = await User.findOne({ firebaseUid: userObjectId });
+            if (user) {
+                userObjectId = user._id;
+            } else {
+                return res.json({
+                    meals_saved: 0,
+                    food_weight_saved: 0,
+                    co2_saved: 0
+                });
+            }
+        } else {
+            userObjectId = new mongoose.Types.ObjectId(userObjectId);
+        }
+
         const stats = await Donation.aggregate([
-            { $match: { donorId: req.params.id, status: 'DELIVERED' } }, // Match User ID logic needed
+            { $match: { donorId: userObjectId, status: 'DELIVERED' } },
             // If user is Donor: count their donations
             // If user is Volunteer/NGO: count their claimed donations?
             // Let's assume this is for ANY user role based on their ID in relevant fields

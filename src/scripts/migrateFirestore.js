@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
-const admin = require('../config/firebase');
+const { admin } = require('../config/firebase');
 const User = require('../models/User');
 const Donation = require('../models/Donation');
 

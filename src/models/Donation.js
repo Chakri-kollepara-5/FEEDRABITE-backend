@@ -4,7 +4,8 @@ const donationSchema = new mongoose.Schema({
     donorId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
-        required: true
+        required: true,
+        index: true
     },
     title: {
         type: String,
@@ -60,10 +61,60 @@ const donationSchema = new mongoose.Schema({
     },
     pickedUpAt: Date,
     deliveredAt: Date,
+
+    // --- AI Freshness Analysis Fields ---
+    preparationTime: {
+        type: Number, // hours ago
+        default: 0
+    },
+    storageMethod: {
+        type: String,
+        enum: ['Room Temperature', 'Refrigerated', 'Frozen', 'Hot Held'],
+        default: 'Room Temperature'
+    },
+    freshnessScore: {
+        type: Number,
+        min: 0,
+        max: 100,
+        default: null
+    },
+    imageScore: {
+        type: Number,
+        default: null
+    },
+    foodCondition: {
+        type: String,
+        enum: ['Excellent', 'Good', 'Needs Immediate Pickup', 'High Risk', 'Unsafe', 'Pending Analysis'],
+        default: 'Pending Analysis'
+    },
+    safeConsumptionHours: {
+        type: Number,
+        default: null
+    },
+    recommendedRadius: {
+        type: Number, // km
+        default: null
+    },
+    confidenceScore: {
+        type: Number,
+        default: null
+    },
+    aiNotes: {
+        type: String,
+        default: ''
+    },
+    analyzedAt: {
+        type: Date,
+        default: null
+    },
+
     createdAt: {
         type: Date,
-        default: Date.now
+        default: Date.now,
+        index: true
     }
 });
+
+donationSchema.index({ status: 1, createdAt: -1 });
 
 module.exports = mongoose.model('Donation', donationSchema);

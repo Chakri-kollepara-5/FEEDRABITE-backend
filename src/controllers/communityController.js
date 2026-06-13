@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const CommunityEvent = require('../models/CommunityEvent');
 
 // @desc    Get community members (public/safe profile)
 // @route   GET /api/community/members
@@ -36,6 +37,21 @@ const getCommunityMembers = async (req, res, next) => {
     }
 };
 
+// @desc    Get community events
+// @route   GET /api/community/events
+// @access  Private
+const getCommunityEvents = async (req, res, next) => {
+    try {
+        const events = await CommunityEvent.find()
+            .sort({ date: 1 })
+            .limit(20);
+        res.json(events);
+    } catch (error) {
+        next(error);
+    }
+};
+
 module.exports = {
-    getCommunityMembers
+    getCommunityMembers,
+    getCommunityEvents
 };

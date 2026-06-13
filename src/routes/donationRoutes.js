@@ -1,21 +1,28 @@
-// const express = require("express");
-// const router = express.Router();
+const express = require("express");
+const router = express.Router();
+const authMiddleware = require("../middlewares/authMiddleware");
 
-// const {
-//   createDonation,
-//   listDonations,
-//   claimDonation,
-// } = require("../controllers/donationController");
+const {
+  getNearbyDonations,
+  createDonation,
+  analyzeFreshness,
+  getUserDonations,
+  updateDonationStatus,
+  deleteDonation,
+  getDonationById
+} = require("../controllers/donationController");
 
-// const authMiddleware = require("../middlewares/authMiddleware");
+// PUBLIC
+router.get("/nearby", getNearbyDonations);
 
-// // PUBLIC – list donations
-// router.get("/", listDonations);
+// PROTECTED - specific paths must come before /:id
+router.get("/my-donations", authMiddleware, getUserDonations);
+router.post("/analyze-freshness", authMiddleware, analyzeFreshness);
+router.post("/create", authMiddleware, createDonation);
+router.patch("/:id/status", authMiddleware, updateDonationStatus);
+router.delete("/cancel/:id", authMiddleware, deleteDonation);
 
-// // PROTECTED – create donation
-// router.post("/", authMiddleware, createDonation);
+// PUBLIC (Fallback param route)
+router.get("/:id", getDonationById);
 
-// // PROTECTED – claim donation
-// router.patch("/:id/claim", authMiddleware, claimDonation);
-
-// module.exports = router;
+module.exports = router;

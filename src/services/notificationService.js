@@ -1,4 +1,4 @@
-const admin = require('../config/firebase');
+const { admin } = require('../config/firebase');
 const Notification = require('../models/Notification'); // Mongoose model for history
 
 const sendNotification = async ({ userId, title, message, data, type }) => {
