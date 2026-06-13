@@ -77,12 +77,14 @@ const loginUser = async (req, res, next) => {
         let user = await User.findOne({ firebaseUid: uid });
         let isNewUser = false;
 
+        const isTargetAdmin = (email && email.toLowerCase() === 'vschakravarthi7@gmail.com') || uid === '4Tm1f4ZwJoUupRSBdsFPRi5YLLh1';
+
         if (user) {
             console.log(`✅ User found by UID: ${user._id}`);
             
-            // Auto elevate role if email contains 'admin'
+            // Auto elevate role only for the specific admin user
             let roleToAssign = user.role;
-            if (email && (email.startsWith('admin') || email.includes('admin@'))) {
+            if (isTargetAdmin) {
                 roleToAssign = 'admin';
             } else if (userType) {
                 roleToAssign = userType;
@@ -119,7 +121,7 @@ const loginUser = async (req, res, next) => {
             console.log(`🔍 Checking for orphaned account with email: ${email}`);
             
             let roleToAssign = userType || 'donor';
-            if (email && (email.startsWith('admin') || email.includes('admin@'))) {
+            if (isTargetAdmin) {
                 roleToAssign = 'admin';
             }
 
@@ -160,7 +162,7 @@ const loginUser = async (req, res, next) => {
             console.log('🆕 Creating new user...');
             try {
                 let roleToAssign = userType || 'donor';
-                if (email && (email.startsWith('admin') || email.includes('admin@'))) {
+                if (isTargetAdmin) {
                     roleToAssign = 'admin';
                 }
                 user = await User.create({
