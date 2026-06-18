@@ -1,6 +1,6 @@
 const User = require('../models/User');
 const generateToken = require('../utils/generateToken');
-const admin = require('../config/firebase');
+const { auth } = require('../config/firebase');
 
 // @desc    Auth user & get token
 // @route   POST /api/auth/login
@@ -40,7 +40,7 @@ const loginUser = async (req, res, next) => {
 
         if (!isDevMock) {
             try {
-                const decodedToken = await admin.auth().verifyIdToken(firebaseToken);
+                const decodedToken = await auth.verifyIdToken(firebaseToken);
                 uid = decodedToken.uid;
                 email = decodedToken.email ? decodedToken.email.toLowerCase() : (decodedToken.phone_number ? `${decodedToken.phone_number}@phone.com` : null);
                 name = decodedToken.name || req.body.name;

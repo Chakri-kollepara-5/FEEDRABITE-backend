@@ -24,8 +24,8 @@ const authMiddleware = async (req, res, next) => {
       return next();
     } catch (jwtError) {
       // 2. Fallback to Firebase decoding (if frontend sent a raw Firebase token)
-      const { admin } = require("../config/firebase");
-      const decodedToken = await admin.auth().verifyIdToken(token);
+      const { auth } = require("../config/firebase");
+      const decodedToken = await auth.verifyIdToken(token);
       
       // Look up corresponding MongoDB User document by firebaseUid
       const mongoUser = await User.findOne({ firebaseUid: decodedToken.uid });

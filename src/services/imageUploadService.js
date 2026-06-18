@@ -1,4 +1,4 @@
-const admin = require('../config/firebase');
+const { admin } = require('../config/firebase');
 const { v4: uuidv4 } = require('uuid');
 
 const uploadImageToStorage = async (file) => {
