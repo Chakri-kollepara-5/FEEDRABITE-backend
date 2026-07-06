@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const { analyzeFoodFreshness } = require("../services/aiService");
 const { saveDonationWithDualSync, deleteDonationWithDualSync } = require("../services/dbSyncService");
 const cacheService = require("../services/cacheService");
+const { uploadBase64ImageToStorage } = require("../services/imageUploadService");
 
 // GET /api/donations/nearby
 const getNearbyDonations = async (req, res) => {
@@ -94,9 +95,28 @@ const createDonation = async (req, res) => {
       };
     }
 
+    // Convert base64 images in req.body.images to public URLs
+    const imageUrls = [];
+    if (req.body.images && Array.isArray(req.body.images)) {
+      for (const img of req.body.images) {
+        if (img.startsWith('data:image')) {
+          try {
+            const url = await uploadBase64ImageToStorage(img);
+            imageUrls.push(url);
+          } catch (uploadErr) {
+            console.error("Failed to upload base64 image during donation creation:", uploadErr);
+            imageUrls.push(img); // fallback to base64
+          }
+        } else {
+          imageUrls.push(img);
+        }
+      }
+    }
+
     const newDonation = new Donation({
       title: req.body.title || req.body.foodType || "Donation",
       ...req.body,
+      images: imageUrls,
       donorId: donorObjectId,
       location: locationObj,
       status: "POSTED",

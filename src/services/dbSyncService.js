@@ -39,7 +39,11 @@ const syncToFirestore = async (donation) => {
             quantity: donation.quantity,
             status: donation.status === 'POSTED' ? 'available' : donation.status.toLowerCase(),
             urgency: donation.urgency || 'medium',
-            image: (donation.images && donation.images.length > 0) ? donation.images[0] : '',
+            image: (donation.images && donation.images.length > 0) 
+                ? (donation.images[0].startsWith('data:image') 
+                    ? 'https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=2574&auto=format&fit=crop' 
+                    : donation.images[0])
+                : '',
             createdAt: donation.createdAt,
             expiryDate: donation.expiryTime,
             location: donation.location?.formattedAddress || '',
